@@ -41,8 +41,8 @@ print(f"Predicted: {result['class']} ({result['confidence']:.2%})")
 ## Project Structure
 
 ```
-app.py    - Main prediction engine
-requirements.txt           - Dependencies
+app.py                    - Main prediction engine
+requirements.txt          - Dependencies
 class_names.json          - Fruit class names
 ```
 
