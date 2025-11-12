@@ -8,6 +8,10 @@ A production-ready Python application for fruit classification using Vision Tran
 pip install -r requirements.txt
 ```
 
+## Model Installation
+
+See [MODEL_INSTALLATION.md](MODEL_INSTALLATION.md) for instructions on how to install or train the model.
+
 ## Quick Start
 
 ### 1. Simple Prediction Script
@@ -27,7 +31,7 @@ python -m cli predict-batch --directory ./images --output results.json
 
 ### 3. Python API
 ```python
-from fruit_classifier_app import FruitClassifier
+from app import FruitClassifier
 
 classifier = FruitClassifier(
     model_weights_path="model.pt",
@@ -38,12 +42,22 @@ result = classifier.predict("image.jpg", return_probs=True)
 print(f"Predicted: {result['class']} ({result['confidence']:.2%})")
 ```
 
+### 4. Web Interface
+```bash
+streamlit run app.py
+```
+
 ## Project Structure
 
 ```
-app.py                    - Main prediction engine
-requirements.txt          - Dependencies
+app.py                    - Main prediction engine and web UI
+cli.py                    - Command-line interface
+predict.py                - Simple prediction script
 class_names.json          - Fruit class names
+requirements.txt          - Dependencies
+setup.py                  - Package installation
+__init__.py               - Package initialization
+MODEL_INSTALLATION.md     - Model installation instructions
 ```
 
 ## Features
@@ -51,7 +65,7 @@ class_names.json          - Fruit class names
 - Single and batch image predictions
 - GPU support (automatic CUDA detection)
 - Top-K predictions with confidence scores
-- Three usage interfaces (CLI, script, Python API)
+- Four usage interfaces (CLI, script, Python API, Web UI)
 - JSON output for batch results
 - Production-ready error handling
 
@@ -61,6 +75,7 @@ class_names.json          - Fruit class names
 - PyTorch 1.9+
 - Transformers 4.0+
 - Pillow, numpy, scikit-learn, pandas
+- Streamlit for web interface
 - Optional: CUDA 10.2+ for GPU support
 
 ## Model Details

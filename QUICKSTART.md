@@ -9,12 +9,30 @@ pip install -r requirements.txt
 
 ## Running the Application
 
+### 1. Web Interface
 To launch the interactive web application:
 ```bash
 streamlit run app.py
 ```
 
 The app will open in your default browser at `http://localhost:8501`
+
+### 2. Simple Prediction Script
+```bash
+python predict.py path/to/image.jpg
+```
+
+### 3. Command-Line Interface
+```bash
+# Single image prediction
+python -m cli predict --image path/to/image.jpg
+
+# Batch processing
+python -m cli predict-batch --directory path/to/images --output results.json
+
+# Extract class names from training directory
+python -m cli save-classes --directory path/to/Training
+```
 
 ## Features
 
@@ -38,8 +56,13 @@ The app will open in your default browser at `http://localhost:8501`
 ```
 .
 ├── app.py                 # Main application (all-in-one)
+├── cli.py                 # Command-line interface
+├── predict.py             # Simple prediction script
 ├── class_names.json       # List of fruit classes
 ├── requirements.txt       # Python dependencies
+├── setup.py              # Package installation
+├── __init__.py           # Package initialization
+├── MODEL_INSTALLATION.md # Model installation instructions
 └── model.pt              # Trained model weights (optional)
 ```
 

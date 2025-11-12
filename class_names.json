@@ -1,1 +1,17 @@
-["Apple", "Banana", "Orange", "Mango", "Strawberry"]
+[
+  "Apple", "Apricot", "Avocado", "Banana", "Blueberry", "Calamansi",
+  "Carambula", "Cherimoya", "Cherry", "Chestnut", "Clementine", "Coconut",
+  "Coqunut Young", "Custard Apple", "Date", "Dragonfruit", "Durian", "Fig",
+  "Grapefruit", "Grape Blue", "Grape Pink", "Grape White", "Granadilla",
+  "Guava", "Hazelnut", "Huckleberry", "Jackfruit", "Jambul", "Kaki",
+  "Kiwi", "Kiwifruit Golden", "Kumquat", "Lemon", "Lime", "Loquat",
+  "Lychee", "Mace", "Mango", "Mangosteen", "Mangostan", "Maracuja",
+  "Melon Piel de Sapo", "Melon", "Miracle Fruit", "Mulberry", "Nectarine",
+  "Nut Forest", "Nut Pecan", "Onion Red", "Onion White", "Orange",
+  "Papaya", "Passion Fruit", "Peach", "Pear", "Pear Abate", "Pear Monster",
+  "Pear William", "Pepino", "Persimmon", "Physalis", "Pineapple", "Pink Lady",
+  "Pitaya Red", "Plum", "Pomegranate", "Pomelo", "Prickly Pear", "Prune",
+  "Quince", "Rambutan", "Raspberry Black", "Raspberry", "Redcurrant",
+  "Salak", "Strawberry", "Tamarind", "Tangerine", "Tangelo", "Teaberry",
+  "Tomate Cherry", "Tomate", "Tomato", "Walnut", "Watermelon", "Yuzu"
+]

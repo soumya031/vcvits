@@ -10,7 +10,7 @@ from transformers import ViTFeatureExtractor, ViTModel
 from torchvision import transforms
 from PIL import Image
 import os
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 import json
 import io
 import base64
@@ -60,7 +60,7 @@ class FruitClassifier:
         self,
         model_weights_path: str = "model.pt",
         class_names_path: str = "class_names.json",
-        device: str = None,
+        device: Optional[str] = None,
         latent_dim: int = 256
     ):
         """
@@ -121,33 +121,39 @@ class FruitClassifier:
     
     def _load_model(self) -> CategoryClass:
         """Load the trained model."""
-        # Load pre-trained ViT
-        vit = ViTModel.from_pretrained('google/vit-base-patch16-224')
-        
-        # Freeze ViT layers except pooler
-        for param in vit.parameters():
-            param.requires_grad = False
-        vit.pooler.dense.weight.requires_grad = True
-        vit.pooler.dense.bias.requires_grad = True
-        
-        # Create model
-        model = CategoryClass(
-            vit=vit,
-            latent_dim=self.latent_dim,
-            classes_=len(self.class_names)
-        ).to(self.device)
-        
-        # Load weights if file exists
-        if os.path.exists(self.model_weights_path):
-            model.load_state_dict(torch.load(
-                self.model_weights_path,
-                map_location=self.device
-            ))
-            print(f"Model loaded from {self.model_weights_path}")
-        else:
-            print(f"Warning: Model weights not found at {self.model_weights_path}")
-        
-        return model
+        try:
+            # Load pre-trained ViT
+            vit = ViTModel.from_pretrained('google/vit-base-patch16-224', add_pooling_layer=True)
+            
+            # Freeze ViT layers except pooler
+            for param in vit.parameters():
+                param.requires_grad = False
+            if hasattr(vit, 'pooler') and vit.pooler is not None:
+                vit.pooler.dense.weight.requires_grad = True
+                vit.pooler.dense.bias.requires_grad = True
+            
+            # Create model
+            model = CategoryClass(
+                vit=vit,
+                latent_dim=self.latent_dim,
+                classes_=len(self.class_names)
+            ).to(self.device)
+            
+            # Load weights if file exists
+            if os.path.exists(self.model_weights_path):
+                model.load_state_dict(torch.load(
+                    self.model_weights_path,
+                    map_location=self.device
+                ))
+                print(f"Model loaded from {self.model_weights_path}")
+            else:
+                print(f"Warning: Model weights not found at {self.model_weights_path}")
+                print("Using pre-trained ViT model without fine-tuning")
+            
+            return model
+        except Exception as e:
+            print(f"Error loading model: {str(e)}")
+            raise
     
     def _preprocess_image(self, image_path: str) -> torch.Tensor:
         """
@@ -159,9 +165,18 @@ class FruitClassifier:
         Returns:
             Preprocessed image tensor
         """
-        image = Image.open(image_path).convert('RGB')
-        image = self.data_transforms(image)
-        return image.unsqueeze(0)  # Add batch dimension
+        try:
+            image = Image.open(image_path).convert('RGB')
+            image_tensor = self.data_transforms(image)
+            # Ensure we have a tensor and add batch dimension
+            if not torch.is_tensor(image_tensor):
+                image_tensor = transforms.ToTensor()(image)
+            # Add batch dimension if not present
+            if len(image_tensor.shape) == 3:
+                image_tensor = image_tensor.unsqueeze(0)
+            return image_tensor
+        except Exception as e:
+            raise ValueError(f"Error preprocessing image {image_path}: {str(e)}")
     
     def predict(
         self,
@@ -194,7 +209,7 @@ class FruitClassifier:
             probabilities = torch.softmax(outputs, dim=1)[0]
             confidence, predicted_idx = torch.max(probabilities, 0)
         
-        predicted_class = self.class_names[predicted_idx.item()]
+        predicted_class = self.class_names[int(predicted_idx.item())]
         confidence_score = confidence.item()
         
         result = {
@@ -207,7 +222,7 @@ class FruitClassifier:
             top_probs, top_indices = torch.topk(probabilities, k=min(5, len(self.class_names)))
             result['top_predictions'] = [
                 {
-                    'class': self.class_names[idx.item()],
+                    'class': self.class_names[int(idx.item())],
                     'probability': prob.item()
                 }
                 for prob, idx in zip(top_probs, top_indices)
@@ -303,12 +318,13 @@ def display_prediction_results(result):
             'Confidence': [pred['probability'] * 100 for pred in top_preds]
         }
         
-        st.bar_chart(
-            data=[{'name': pred['class'], 'value': pred['probability'] * 100} 
-                  for pred in top_preds],
-            x='name',
-            y='value'
-        )
+        # Create DataFrame for bar chart
+        import pandas as pd
+        chart_data = pd.DataFrame({
+            'Fruit': [pred['class'] for pred in top_preds],
+            'Confidence': [pred['probability'] * 100 for pred in top_preds]
+        })
+        st.bar_chart(chart_data.set_index('Fruit'))
         
         # Table view
         st.dataframe(
@@ -384,7 +400,7 @@ def main():
     
     # ==================== SINGLE IMAGE PREDICTION ====================
     if page == "Single Image Prediction":
-        st.title("🍎 Fruit Classification AI")
+        st.title("🍎 Fruit Classification App")
         st.markdown("### Single Image Prediction")
         st.write("Upload an image of a fruit to identify it using Vision Transformer AI")
         
@@ -406,7 +422,7 @@ def main():
                 
                 # Display uploaded image
                 image = Image.open(uploaded_file)
-                st.image(image, use_column_width=True, caption="Uploaded Image")
+                st.image(image, use_container_width=True, caption="Uploaded Image")
                 
                 # Predict button
                 if st.button("🔍 Classify Fruit", key="predict_btn"):
